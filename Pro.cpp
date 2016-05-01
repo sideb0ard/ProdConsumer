@@ -2,54 +2,64 @@
 #include <future>
 #include <deque>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
 
 using namespace std;
 
-mutex g_out;
+std::mutex g_out;
+
+std::mutex g_shutdown;
+std::condition_variable cv;
 
 class Worker {
 private:
   deque<string> m_messages;
+
+  thread m_executor;
+
   void gen_message() {
-    int nom = rand() % 100;
     string l{"LOGLINE"};
-    l += to_string(nom);
-    //cout << l << "\n";
+    l += to_string(rand() % 100);
+    { 
+      lock_guard<mutex> guard(g_out);
+      cout << "[" << this_thread::get_id() << "] - Msg " << l << "\n";
+    }
     m_messages.push_back(l);
-    //{ 
-    //  lock_guard<mutex> guard(g_out);
-    //  cout << "[worker " << m_tid << " gen_msg] = Size of messages: " << m_messages.size() << "\n";
-    //}
   }
+
 public:
+
+  Worker() {
+    cout << "Worker starting up yo!\n";
+  }
+
+  ~Worker() {
+    m_executor.join();
+  }
+
+  void start() {
+    m_executor = std::thread(&Worker::run, this);
+  }
+
 
   void run() {
     while (true) {
-      {
-        lock_guard<mutex> guard(g_out);
-        cout << "Hi! I'm " << this_thread::get_id() << "\n";
-      }
       gen_message();
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
   }
 
   void get_log() {
-    { 
-      lock_guard<mutex> guard(g_out);
-      //cout << "[worker] get_log call - msg count: " << m_messages.size() << "\n"; 
-    }
     if ( !m_messages.empty() ) {
       { 
         lock_guard<mutex> guard(g_out);
-        cout << "[get_log] Before:: Size of messages: " << m_messages.size() << "\n";
+        cout << "[" << this_thread::get_id() << "] Before:: Size of messages: " << m_messages.size() << "\n";
       }
       string l = m_messages.front();
       m_messages.pop_front();
       { 
         lock_guard<mutex> guard(g_out);
-        cout << "[get_log] After:: Size of messages: " << m_messages.size() << "\n";
-        cout << "MESSAGE: " << l << "\n\n";
+        cout << "[" << this_thread::get_id() << "] Message " << l << "\n";
       }
     }
   }
@@ -75,20 +85,21 @@ private:
 
 int main()
 {
+  cout << "[" << this_thread::get_id() << "] Mainthread\n";
   srand (time(NULL));
-  //Worker w1;
   auto w1 = std::make_shared<Worker>();
-  thread tw1 (&Worker::run, w1);
-
+  w1->start();
   auto w2 = std::make_shared<Worker>();
-  thread tw2 (&Worker::run, w2);
+  w2->start();
 
-  Logger l;
-  l.add_worker(w1);
-  l.add_worker(w2);
-  l.run();
+  //Logger l;
+  //l.add_worker(w1);
+  //l.add_worker(w2);
+  //l.run();
 
-  tw1.join();
-  tw2.join();
+  //tw1.join();
+  //tw2.join();
+   std::unique_lock<std::mutex> lk(g_shutdown);
+   cv.wait(lk);
   
 }
