@@ -12,9 +12,10 @@ std::mutex g_out;
 std::mutex g_shutdown;
 std::condition_variable cv;
 
+thread_local deque<string> m_messages;
+
 class Worker {
 private:
-  deque<string> m_messages;
 
   thread m_executor;
 
@@ -51,15 +52,15 @@ public:
 
   void get_log() {
     if ( !m_messages.empty() ) {
-      { 
-        lock_guard<mutex> guard(g_out);
-        cout << "[" << this_thread::get_id() << "] Before:: Size of messages: " << m_messages.size() << "\n";
-      }
+      //{ 
+      //  lock_guard<mutex> guard(g_out);
+      //  cout << "[" << this_thread::get_id() << "] Before:: Size of messages: " << m_messages.size() << "\n";
+      //}
       string l = m_messages.front();
       m_messages.pop_front();
       { 
         lock_guard<mutex> guard(g_out);
-        cout << "[" << this_thread::get_id() << "] Message " << l << "\n";
+        cout << "[" << this_thread::get_id() << "] - Msg " << l << "\n";
       }
     }
   }
@@ -91,15 +92,16 @@ int main()
   w1->start();
   auto w2 = std::make_shared<Worker>();
   w2->start();
+  auto w3 = std::make_shared<Worker>();
+  w3->start();
 
-  //Logger l;
-  //l.add_worker(w1);
-  //l.add_worker(w2);
-  //l.run();
+  Logger l;
+  l.add_worker(w1);
+  l.add_worker(w2);
+  l.add_worker(w3);
+  l.run();
 
-  //tw1.join();
-  //tw2.join();
-   std::unique_lock<std::mutex> lk(g_shutdown);
-   cv.wait(lk);
+  std::unique_lock<std::mutex> lk(g_shutdown);
+  cv.wait(lk);
   
 }
