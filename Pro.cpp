@@ -25,7 +25,7 @@ int main()
   LoggerPtr l = std::make_shared<Logger>();
   WorkerPtr w = std::make_shared<Worker>(l);
 
-  for ( int i = 0; i < 5; i++ ) {
+  while (true) {
     JobPtr j = std::make_shared<Job>();
     j->type = "wurk";
     w->add_job(j);

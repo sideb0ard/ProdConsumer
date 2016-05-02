@@ -36,11 +36,12 @@ void Logger::register_worker(Worker* w) {
 
 void Logger::run() {
   std::cout << "[" << std::this_thread::get_id() << "] Logger starting up!!\n";
-  //while (true) {
+  while (true) {
     if ( m_logs.size() > 0 ) {
       for ( auto l : m_logs )  {
         std::cout << "[" << std::this_thread::get_id() << "] LOGGING.. " << l << "\n";
       }
+      m_logs.clear();
     }
     for ( auto w : m_workers ) {
       JobPtr j = std::make_shared<Job>();
@@ -53,13 +54,8 @@ void Logger::run() {
       w->add_job(j);
 
       f.wait();
-      {
-        std::lock_guard<std::mutex> guard(g_out);
-        std::cout << "Got results!\n";
-      }
+      auto l = f.get();
+      m_logs.insert(std::end(m_logs), std::begin(l), std::end(l));
     }
-
-    //std::unique_lock<std::mutex> lck(m_logs_ready_mtx);
-    //m_logs_ready_cond.wait(lck);
-  //}
+  }
 }

@@ -14,8 +14,6 @@ class Logger
 {
 private:
   std::thread m_executor;
-  std::mutex m_logs_ready_mtx;
-  std::condition_variable m_logs_ready_cond;
   std::vector<Worker*> m_workers;
 public:
   Logger();

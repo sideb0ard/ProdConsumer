@@ -46,10 +46,7 @@ void Worker::gen_log_msg() {
 
 void Worker::flush_logs(JobPtr j) {
   j->logs_buffer.set_value(m_logs);
-  //while ( m_logs.size() > 0 ) {
-  //    auto l = m_logs.front();
-  //    m_logs.pop_front();
-  //}
+  m_logs.clear();
 }
 
 void Worker::run() {
@@ -79,7 +76,7 @@ void Worker::run() {
     m_jobs_ready_cond.wait(lk);
     {
       std::lock_guard<std::mutex> guard(g_out);
-      std::cout << "Oh! new jobs ready!\n";
+      //std::cout << "Oh! new jobs ready!\n";
     }
   }
 }
