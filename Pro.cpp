@@ -85,16 +85,25 @@ typedef std::shared_ptr<Worker> WorkerPtr;
 
 class Logger {
 private:
+  thread m_executor;
   vector<WorkerPtr> m_workers;
 public:
+  Logger() {
+    m_executor = std::thread(&Logger::log, this);
+  }
+  ~Logger() {
+    m_executor.join();
+  }
   void add_worker(WorkerPtr w) {
     m_workers.push_back(w);
   }
-  void run() {
-    for ( auto w : m_workers )  {
-      JobPtr j = std::make_shared<Job>();
-      j->name = "blah";
-      w->send(j);
+  void log() {
+    while (true) {
+      for ( auto w : m_workers )  {
+        JobPtr j = std::make_shared<Job>();
+        j->name = "get logs";
+        w->send(j);
+      }
     }
   }
 };
@@ -107,7 +116,6 @@ int main()
 
   Logger l;
   l.add_worker(w1);
-  l.run();
 
   std::unique_lock<std::mutex> lk(g_shutdown);
   g_shutdown_cond.wait(lk);
