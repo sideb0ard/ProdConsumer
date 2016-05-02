@@ -9,7 +9,8 @@
 #include "worker.hpp"
 #include "logger.hpp"
 
-extern thread_local deque<string> m_logs;
+extern std::mutex g_out;
+extern thread_local std::deque<std::string> m_logs;
 
 Worker::Worker(LoggerPtr l) {
   m_logger = l;
@@ -23,8 +24,8 @@ Worker::~Worker() {
 
 void Worker::add_job(JobPtr j) {
   {
-    lock_guard<mutex> guard(g_out);
-    cout << "received Job = type: " << j->type << "\n";
+    std::lock_guard<std::mutex> guard(g_out);
+    std::cout << "received Job = type: " << j->type << "\n";
   }
   m_jobs.push_back(j);
   m_jobs_ready_cond.notify_all();
@@ -32,13 +33,13 @@ void Worker::add_job(JobPtr j) {
 
 // ## private ##
 void Worker::gen_log_msg() {
-  auto my_id = this_thread::get_id();
-  stringstream ss;
-  ss << "[" << my_id << "] POPPED A JOBBIE - LOGLINE" << to_string(rand() % 100);
-  string l = ss.str();
+  auto my_id = std::this_thread::get_id();
+  std::stringstream ss;
+  ss << "[" << my_id << "] POPPED A JOBBIE - LOGLINE" << std::to_string(rand() % 100);
+  std::string l = ss.str();
   {
-    lock_guard<mutex> guard(g_out);
-    cout << "[" << this_thread::get_id() << "] - Msg " << l << "\n";
+    std::lock_guard<std::mutex> guard(g_out);
+    std::cout << "[" << std::this_thread::get_id() << "] - Msg " << l << "\n";
   }
   m_logs.push_back(l);
 }
@@ -47,14 +48,13 @@ void Worker::flush_logs() {
   while ( m_logs.size() > 0 ) {
       auto l = m_logs.front();
       m_logs.pop_front();
-      m_logger->add_log(l);
   }
 }
 
 void Worker::run() {
   {
-    lock_guard<mutex> guard(g_out);
-    cout << "[" << this_thread::get_id() << "] Worker starting up yo!\n";
+    std::lock_guard<std::mutex> guard(g_out);
+    std::cout << "[" << std::this_thread::get_id() << "] Worker starting up yo!\n";
   }
   while (true) {
     while ( m_jobs.size() > 0 ) {
@@ -62,14 +62,14 @@ void Worker::run() {
       m_jobs.pop_front();
       if ( j->type.compare("wurk") == 0 ) {
         {
-          lock_guard<mutex> guard(g_out);
-          cout << "[" << this_thread::get_id() << "] Popped a jobbie!\n";
+          std::lock_guard<std::mutex> guard(g_out);
+          std::cout << "[" << std::this_thread::get_id() << "] Popped a jobbie!\n";
         }
         gen_log_msg();
       } else if ( j->type.compare("flush_logs") == 0 ) {
         {
-          lock_guard<mutex> guard(g_out);
-          cout << "[" << this_thread::get_id() << "] Flushing logs to Logger!\n";
+          std::lock_guard<std::mutex> guard(g_out);
+          std::cout << "[" << std::this_thread::get_id() << "] Flushing logs to Logger!\n";
         }
         flush_logs();
       }
@@ -77,8 +77,8 @@ void Worker::run() {
     std::unique_lock<std::mutex> lk(m_jobs_ready_mtx);
     m_jobs_ready_cond.wait(lk);
     {
-      lock_guard<mutex> guard(g_out);
-      cout << "Oh! new jobs ready!\n";
+      std::lock_guard<std::mutex> guard(g_out);
+      std::cout << "Oh! new jobs ready!\n";
     }
   }
 }

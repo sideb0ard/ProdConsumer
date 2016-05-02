@@ -13,11 +13,11 @@ std::mutex g_out;
 std::mutex g_shutdown;
 std::condition_variable g_shutdown_cond;
 
-thread_local deque<string> m_logs;
+thread_local std::deque<std::string> m_logs;
 
 int main()
 {
-  std::cout << "[" << this_thread::get_id() << "] Mainthread\n";
+  std::cout << "[" << std::this_thread::get_id() << "] Mainthread\n";
   srand (time(NULL));
 
   LoggerPtr l = std::make_shared<Logger>();
