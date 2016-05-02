@@ -9,7 +9,7 @@
 class Job {
 public:
   std::string type;
-  std::future<std::vector<std::string>> logs_buffer;
+  std::promise<std::vector<std::string>> logs_buffer;
 };
 typedef std::shared_ptr<Job> JobPtr;
 

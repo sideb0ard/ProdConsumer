@@ -20,7 +20,7 @@ private:
   std::condition_variable m_jobs_ready_cond;
 
   void gen_log_msg();
-  void flush_logs();
+  void flush_logs(JobPtr j);
   void run();
 public:
   Worker(LoggerPtr l);

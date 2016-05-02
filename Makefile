@@ -1,12 +1,9 @@
-CC = g++
-CFLAGS = -std=c++11 -Wall -Werror
-SRC = Pro.cpp worker.cpp logger.cp
-OBJ = $(SRC:.cpp=.o)
-LIBS = -lpthread
-
 TARGET = pro
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ) $(LIBS)
+$(TARGET):
+	g++ -o pro Pro.cpp worker.cpp logger.cpp  -std=c++11 -pthread
+
+clean:
+	rm -f *.o *~ $(TARGET)

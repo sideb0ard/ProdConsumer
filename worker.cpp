@@ -10,7 +10,7 @@
 #include "logger.hpp"
 
 extern std::mutex g_out;
-extern thread_local std::deque<std::string> m_logs;
+extern thread_local std::vector<std::string> m_logs;
 
 Worker::Worker(LoggerPtr l) {
   m_logger = l;
@@ -44,11 +44,12 @@ void Worker::gen_log_msg() {
   m_logs.push_back(l);
 }
 
-void Worker::flush_logs() {
-  while ( m_logs.size() > 0 ) {
-      auto l = m_logs.front();
-      m_logs.pop_front();
-  }
+void Worker::flush_logs(JobPtr j) {
+  j->logs_buffer.set_value(m_logs);
+  //while ( m_logs.size() > 0 ) {
+  //    auto l = m_logs.front();
+  //    m_logs.pop_front();
+  //}
 }
 
 void Worker::run() {
@@ -71,7 +72,7 @@ void Worker::run() {
           std::lock_guard<std::mutex> guard(g_out);
           std::cout << "[" << std::this_thread::get_id() << "] Flushing logs to Logger!\n";
         }
-        flush_logs();
+        flush_logs(j);
       }
     }
     std::unique_lock<std::mutex> lk(m_jobs_ready_mtx);
