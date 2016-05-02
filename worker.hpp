@@ -5,6 +5,7 @@
 #include <deque>
 #include <mutex>
 #include <vector>
+#include <memory>
 
 #include "logger.hpp"
 #include "job.hpp"

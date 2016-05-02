@@ -3,6 +3,8 @@
 
 #include <future>
 #include <vector>
+#include <string>
+#include <memory>
 
 class Job {
 public:

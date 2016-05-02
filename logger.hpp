@@ -6,10 +6,12 @@
 #include <future>
 #include <mutex>
 #include <vector>
+#include <memory>
 
-#include "worker.hpp"
+class Worker;
 
-class Logger {
+class Logger
+{
 private:
   std::thread m_executor;
   std::mutex m_logs_ready_mtx;

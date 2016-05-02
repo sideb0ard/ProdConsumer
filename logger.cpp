@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 
+#include "logger.hpp"
 #include "worker.hpp"
 #include "job.hpp"
 
@@ -41,11 +42,11 @@ void Logger::run() {
         std::cout << "[" << std::this_thread::get_id() << "] LOGGING.. " << l << "\n";
       }
     }
-    for ( auto w : m_workers ) {
-      JobPtr j = std::make_shared<Job>();
-      j->type = "flush_logs";
-      w->add_job(j);
-    }
+    //for ( auto w : m_workers ) {
+    //  JobPtr j = std::make_shared<Job>();
+    //  j->type = "flush_logs";
+    //  w->add_job(j);
+    //}
 
     std::unique_lock<std::mutex> lck(m_logs_ready_mtx);
     m_logs_ready_cond.wait(lck);
