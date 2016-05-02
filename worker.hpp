@@ -11,8 +11,8 @@
 
 class Worker {
 private:
-  thread m_executor;
-  deque<JobPtr> m_jobs;
+  std::thread m_executor;
+  std::deque<JobPtr> m_jobs;
   LoggerPtr m_logger;
 
   std::mutex m_jobs_ready_mtx;
@@ -26,5 +26,6 @@ public:
   ~Worker();
   void add_job(JobPtr j);
 };
+typedef std::shared_ptr<Worker> WorkerPtr;
 
 #endif // _WORKER_HPP_
