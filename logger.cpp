@@ -1,9 +1,6 @@
-#include <condition_variable>
-#include <deque>
 #include <future>
 #include <iostream>
 #include <mutex>
-#include <sstream>
 #include <vector>
 
 #include "logger.hpp"
