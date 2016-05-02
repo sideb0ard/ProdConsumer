@@ -1,3 +1,6 @@
+#ifndef _LOGGER_HPP_
+#define _LOGGER_HPP_
+
 #include <condition_variable>
 #include <deque>
 #include <future>
@@ -19,3 +22,5 @@ public:
   void run();
 };
 typedef std::shared_ptr<Logger> LoggerPtr;
+
+#endif //  _LOGGER_HPP_

@@ -1,3 +1,6 @@
+#ifndef _WORKER_HPP_
+#define _WORKER_HPP_
+
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -23,3 +26,5 @@ public:
   ~Worker();
   void add_job(JobPtr j);
 };
+
+#endif // _WORKER_HPP_
