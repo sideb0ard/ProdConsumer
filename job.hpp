@@ -6,8 +6,8 @@
 
 class Job {
 public:
-  string type;
-  std::future<vector<string>> logs_buffer;
+  std::string type;
+  std::future<std::vector<std::string>> logs_buffer;
 };
 typedef std::shared_ptr<Job> JobPtr;
 

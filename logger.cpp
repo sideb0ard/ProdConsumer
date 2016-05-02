@@ -10,7 +10,7 @@
 #include "job.hpp"
 
 extern std::mutex g_out;
-extern thread_local deque<std::string> m_logs;
+extern thread_local std::deque<std::string> m_logs;
 
 Logger::Logger() {
   m_executor = std::thread(&Logger::run, this);
